@@ -44,7 +44,11 @@ export function buildInboundMediaNote(ctx: MsgContext): string | undefined {
       : ctx.MediaPath?.trim()
         ? [ctx.MediaPath.trim()]
         : [];
+  // eslint-disable-next-line no-console
+  console.log(`[IMG-DIAG] Step 3: buildInboundMediaNote — MediaPath=${ctx.MediaPath ?? "undefined"}, paths=[${paths.join(",")}], suppressed=[${[...suppressed].join(",")}], MediaUnderstanding=${Array.isArray(ctx.MediaUnderstanding) ? ctx.MediaUnderstanding.length : 0} outputs, decisions=${Array.isArray(ctx.MediaUnderstandingDecisions) ? ctx.MediaUnderstandingDecisions.map(d => `${d.capability}:${d.outcome}`).join(",") : "none"}`);
   if (paths.length === 0) {
+    // eslint-disable-next-line no-console
+    console.log(`[IMG-DIAG] Step 3: No paths found — mediaNote will be UNDEFINED (no image path in prompt!)`);
     return undefined;
   }
 
@@ -66,14 +70,19 @@ export function buildInboundMediaNote(ctx: MsgContext): string | undefined {
     }))
     .filter((entry) => !suppressed.has(entry.index));
   if (entries.length === 0) {
+    // eslint-disable-next-line no-console
+    console.log(`[IMG-DIAG] Step 3: All entries suppressed (already handled by media understanding) — mediaNote=undefined`);
     return undefined;
   }
   if (entries.length === 1) {
-    return formatMediaAttachedLine({
+    const note = formatMediaAttachedLine({
       path: entries[0]?.path ?? "",
       type: entries[0]?.type,
       url: entries[0]?.url,
     });
+    // eslint-disable-next-line no-console
+    console.log(`[IMG-DIAG] Step 3: mediaNote="${note}"`);
+    return note;
   }
 
   const count = entries.length;
@@ -89,5 +98,8 @@ export function buildInboundMediaNote(ctx: MsgContext): string | undefined {
       }),
     );
   }
-  return lines.join("\n");
+  const note = lines.join("\n");
+  // eslint-disable-next-line no-console
+  console.log(`[IMG-DIAG] Step 3: mediaNote (multi)="${note.slice(0, 200)}"`);
+  return note;
 }

@@ -359,6 +359,7 @@ export async function detectAndLoadPromptImages(params: {
 }> {
   // If model doesn't support images, return empty results
   if (!modelSupportsImages(params.model)) {
+    log.info(`[IMG-DIAG] Step 5: detectAndLoadPromptImages — model does NOT support images (input=${JSON.stringify(params.model.input)}), returning empty`);
     return {
       images: [],
       historyImagesByIndex: new Map(),
@@ -368,6 +369,7 @@ export async function detectAndLoadPromptImages(params: {
     };
   }
 
+  log.info(`[IMG-DIAG] Step 5: detectAndLoadPromptImages — model supports images, scanning prompt (${params.prompt.length} chars): "${params.prompt.slice(0, 300)}"`);
   // Detect images from current prompt
   const promptRefs = detectImageReferences(params.prompt);
 
@@ -384,6 +386,7 @@ export async function detectAndLoadPromptImages(params: {
   const allRefs = [...promptRefs, ...uniqueHistoryRefs];
 
   if (allRefs.length === 0) {
+    log.info(`[IMG-DIAG] Step 5: NO image refs detected in prompt or history — model will NOT see any image! existingImages=${params.existingImages?.length ?? 0}`);
     return {
       images: params.existingImages ?? [],
       historyImagesByIndex: new Map(),
@@ -393,6 +396,9 @@ export async function detectAndLoadPromptImages(params: {
     };
   }
 
+  log.info(
+    `[IMG-DIAG] Step 5: Detected ${allRefs.length} image refs (${promptRefs.length} in prompt, ${uniqueHistoryRefs.length} in history): ${allRefs.map(r => r.resolved).join(", ")}`,
+  );
   log.debug(
     `Native image: detected ${allRefs.length} image refs (${promptRefs.length} in prompt, ${uniqueHistoryRefs.length} in history)`,
   );
@@ -430,6 +436,7 @@ export async function detectAndLoadPromptImages(params: {
     }
   }
 
+  log.info(`[IMG-DIAG] Step 5: Image load result — loaded=${loadedCount}, skipped=${skippedCount}, promptImages=${promptImages.length}, historyImages=${historyImagesByIndex.size} messages`);
   const sanitizedPromptImages = await sanitizeImagesWithLog(promptImages, "prompt:images");
   const sanitizedHistoryImagesByIndex = new Map<number, ImageContent[]>();
   for (const [index, images] of historyImagesByIndex) {

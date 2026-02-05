@@ -247,12 +247,16 @@ export async function runPreparedReply(
   const skillsSnapshot = skillResult.skillsSnapshot;
   const prefixedBody = [threadStarterNote, prefixedBodyBase].filter(Boolean).join("\n\n");
   const mediaNote = buildInboundMediaNote(ctx);
+  // eslint-disable-next-line no-console
+  console.log(`[IMG-DIAG] Step 4: get-reply-run — mediaNote=${mediaNote ? `"${mediaNote.slice(0, 150)}"` : "undefined"}, provider=${provider}, model=${model}`);
   const mediaReplyHint = mediaNote
     ? "To send an image back, prefer the message tool (media/path/filePath). If you must inline, use MEDIA:/path or MEDIA:https://example.com/image.jpg (spaces ok, quote if needed). Keep caption in the text body."
     : undefined;
   let prefixedCommandBody = mediaNote
     ? [mediaNote, mediaReplyHint, prefixedBody ?? ""].filter(Boolean).join("\n").trim()
     : prefixedBody;
+  // eslint-disable-next-line no-console
+  console.log(`[IMG-DIAG] Step 4: prefixedCommandBody (first 300 chars)="${(prefixedCommandBody ?? "").slice(0, 300)}"`);
   if (!resolvedThinkLevel && prefixedCommandBody) {
     const parts = prefixedCommandBody.split(/\s+/);
     const maybeLevel = normalizeThinkLevel(parts[0]);

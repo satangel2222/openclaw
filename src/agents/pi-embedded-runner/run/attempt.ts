@@ -802,8 +802,10 @@ export async function runEmbeddedAttempt(
           // Only pass images option if there are actually images to pass
           // This avoids potential issues with models that don't expect the images parameter
           if (imageResult.images.length > 0) {
+            log.info(`[IMG-DIAG] Step 6: Sending prompt WITH ${imageResult.images.length} image(s) to model ${params.provider}/${params.modelId}`);
             await abortable(activeSession.prompt(effectivePrompt, { images: imageResult.images }));
           } else {
+            log.info(`[IMG-DIAG] Step 6: Sending prompt WITHOUT images to model ${params.provider}/${params.modelId} — existingImages=${params.images?.length ?? 0}, detectedRefs=${imageResult.detectedRefs.length}, loaded=${imageResult.loadedCount}, skipped=${imageResult.skippedCount}`);
             await abortable(activeSession.prompt(effectivePrompt));
           }
         } catch (err) {

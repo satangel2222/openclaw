@@ -350,6 +350,7 @@ export async function applyMediaUnderstanding(params: {
   const attachments = normalizeMediaAttachments(ctx);
   const providerRegistry = buildProviderRegistry(params.providers);
   const cache = createMediaAttachmentCache(attachments);
+  logVerbose(`[IMG-DIAG] Step 2: applyMediaUnderstanding called — MediaPath=${ctx.MediaPath ?? "undefined"}, MediaType=${ctx.MediaType ?? "undefined"}, Body="${(ctx.Body ?? "").slice(0, 80)}", activeModel=${params.activeModel?.provider ?? "none"}/${params.activeModel?.model ?? "none"}, attachments=${attachments.length}`);
 
   try {
     const fileBlocks = await extractFileBlocks({
@@ -389,7 +390,12 @@ export async function applyMediaUnderstanding(params: {
     if (decisions.length > 0) {
       ctx.MediaUnderstandingDecisions = [...(ctx.MediaUnderstandingDecisions ?? []), ...decisions];
     }
+    for (const d of decisions) {
+      const attSummary = d.attachments.map(a => `idx=${a.attachmentIndex} chosen=${a.chosen?.outcome ?? "none"} provider=${a.chosen?.provider ?? "N/A"}`).join("; ");
+      logVerbose(`[IMG-DIAG] Step 2 decision: capability=${d.capability}, outcome=${d.outcome}, attachments=[${attSummary}]`);
+    }
 
+    logVerbose(`[IMG-DIAG] Step 2 result: outputs=${outputs.length} (${outputs.map(o => o.kind).join(",")}), fileBlocks=${fileBlocks.length}`);
     if (outputs.length > 0) {
       ctx.Body = formatMediaUnderstandingBody({ body: ctx.Body, outputs });
       const audioOutputs = outputs.filter((output) => output.kind === "audio.transcription");

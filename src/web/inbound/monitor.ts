@@ -269,9 +269,13 @@ export async function monitorWebInbox(options: {
           );
           mediaPath = saved.path;
           mediaType = inboundMedia.mimetype;
+          inboundConsoleLog.info(`[IMG-DIAG] Step 1: Media downloaded OK — path=${mediaPath}, type=${mediaType}, size=${inboundMedia.buffer.byteLength} bytes`);
+        } else {
+          inboundConsoleLog.info(`[IMG-DIAG] Step 1: No media found in message (downloadInboundMedia returned null)`);
         }
       } catch (err) {
         logVerbose(`Inbound media download failed: ${String(err)}`);
+        inboundConsoleLog.error(`[IMG-DIAG] Step 1: Media download FAILED — ${String(err)}`);
       }
 
       const chatJid = remoteJid;
